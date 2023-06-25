@@ -4,9 +4,10 @@
 
 A lightweight DDD(Domain Driven Design) Enhancement Framework for complex business architecture.
 
+[![CI](https://github.com/funkygao/cp-ddd-framework/workflows/CI/badge.svg?branch=master)](https://github.com/funkygao/cp-ddd-framework/actions?query=branch%3Amaster+workflow%3ACI)
+[![Javadoc](https://img.shields.io/badge/javadoc-Reference-blue.svg)](https://funkygao.github.io/cp-ddd-framework/doc/apidocs/)
 [![Mavenn Central](https://img.shields.io/maven-central/v/io.github.dddplus/dddplus.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:io.github.dddplus)
 ![Requirement](https://img.shields.io/badge/JDK-8+-blue.svg)
-[![CI](https://github.com/funkygao/cp-ddd-framework/workflows/CI/badge.svg?branch=master)](https://github.com/funkygao/cp-ddd-framework/actions?query=branch%3Amaster+workflow%3ACI)
 [![Maintainability](https://api.codeclimate.com/v1/badges/84b05607593179e62374/maintainability)](https://codeclimate.com/github/funkygao/cp-ddd-framework/maintainability)
 [![Coverage Status](https://img.shields.io/codecov/c/github/funkygao/cp-ddd-framework.svg)](https://codecov.io/gh/funkygao/cp-ddd-framework)
 [![Mentioned in Awesome DDD](https://awesome.re/mentioned-badge.svg)](https://github.com/heynickc/awesome-ddd#jvm)
@@ -23,18 +24,20 @@ Languages： English | [中文](README.zh-cn.md)
 
 ## What is DDDplus?
 
-DDDplus, originally cp-ddd-framework(cp means Central Platform：中台), is a lightweight DDD(Domain Driven Design) Enhancement Framework for complex business architecture.
+DDDplus, originally cp-ddd-framework(cp means Central Platform：中台), is a lightweight DDD Enhancement Framework for complex business architecture. 
 
-Critical enhancements for DDD include:
+It captures DDD missing concepts and patches the building block. It enpowers building domain model with forward and reverse modeling. It visualizes the complete domain knowledge. It connects frontline developers with (architect, product manager, business stakeholder, management team). It makes (analysis, design, design review, implementation, code review, test) a positive feedback closed-loop. It strengthens building extension oriented flexible software solution. It eliminates frequently encountered misunderstanding of DDD via thorough javadoc for each building block.
+
+In short, the 3 most essential `plus` are:
 1. provide [extension point](/dddplus-spec/src/main/java/io/github/dddplus/ext) with multiple routing mechanism, suited for complex business scenarios
-2. [patched](/dddplus-spec/src/main/java/io/github/dddplus/model) DDD building blocks and gived clear and concise javadoc for each building block, clearing obstacles of DDD implementation
-3. invent a [DSL](/dddplus-spec/src/main/java/io/github/dddplus/dsl) for reverse engineering of domain model(JavaAST), visualize complete domain knowledge from code
+2. [patch](/dddplus-spec/src/main/java/io/github/dddplus/model) DDD building blocks for pragmatic forward modeling, clearing obstacles of DDD implementation
+3. offer a reverse modeling [DSL](/dddplus-spec/src/main/java/io/github/dddplus/dsl), visualizing complete domain knowledge from code
 
 ## Current status
 
 Used for several complex critical central platform projects in production environment.
 
-Latest `Maven Central` version is: `1.1.2`, under active development version is: `2.0.0-SNAPSHOT`.
+Latest Maven Central version: `1.1.2`, under active development version: `2.0.0-SNAPSHOT`.
 
 ## Quickstart
 
@@ -51,9 +54,9 @@ Latest `Maven Central` version is: `1.1.2`, under active development version is:
 
 ```java
 @SpringBootApplication(scanBasePackages = {"${your base packages}", "io.github.dddplus"})
-public class WebApplication {
+public class Application {
     public static void main(String[] args) {
-        SpringApplication.run(WebApplication.class);
+        SpringApplication.run(Application.class);
     }
 }
 ```
@@ -71,14 +74,15 @@ Annotate your code With [DSL](/dddplus-spec/src/main/java/io/github/dddplus/dsl)
 
 ```java
 class ReverseModelingTest {
+    ReverseEngineeringModel model;
     @Test
-    void reverseModeling() {
-        DomainModelAnalyzer domainModelAnalyzer = new DomainModelAnalyzer();
-        ReverseEngineeringModel domainModel = domainModelAnalyzer.scan("{your module root}")
-            .analyze();
+    void visualizeDomainModel() {
+        model = new DomainModelAnalyzer()
+                        .scan("{your module root}")
+                        .analyze();
         new PlantUmlBuilder()
-            .build(domainModel)
-            .renderSvg("myModel.svg");
+            .build(model)
+            .renderSvg("model.svg");
     }
 }
 ```
@@ -96,11 +100,11 @@ class ReverseModelingTest {
 Enable it by writing unit test and integrate it with CI flow.
 
 ```java
-public class DDDPlusEnforcerTest {
+class ArchitectureGuardTest {
     @Test
-    public void enforce() {
-        DDDPlusEnforcer enforcer = new DDDPlusEnforcer();
-        enforcer.scanPackages("${your base package}")
+    void enforcement() {
+        new DDDPlusEnforcer()
+                .scanPackages("${your base package}")
                 .enforce();
     }
 }
