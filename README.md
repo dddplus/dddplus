@@ -25,7 +25,7 @@ Languages： English | [中文](README.zh-cn.md)
 
 DDDplus, originally cp-ddd-framework(cp means Central Platform：中台), is a lightweight DDD Enhancement Framework for complex business architecture. 
 
-It captures DDD missing concepts and patches the building block. It enpowers building domain model with forward and reverse modeling. It visualizes the complete domain knowledge. It connects frontline developers with (architect, product manager, business stakeholder, management team). It makes (analysis, design, design review, implementation, code review, test) a positive feedback closed-loop. It strengthens building extension oriented flexible software solution. It eliminates frequently encountered misunderstanding of DDD via thorough javadoc for each building block.
+>It captures DDD missing concepts and patches the building block. It empowers building domain model with forward and reverse modeling. It visualizes the complete domain knowledge from code. It connects frontline developers with (architect, product manager, business stakeholder, management team). It makes (analysis, design, design review, implementation, code review, test) a positive feedback closed-loop. It strengthens building extension oriented flexible software solution. It eliminates frequently encountered misunderstanding of DDD via thorough javadoc for each building block with detailed example.
 
 In short, the 3 most essential `plus` are:
 1. provide [extension point](/dddplus-spec/src/main/java/io/github/dddplus/ext) with multiple routing mechanism, suited for complex business scenarios
@@ -36,11 +36,15 @@ In short, the 3 most essential `plus` are:
 
 Used for several complex critical central platform projects in production environment.
 
-Latest Maven Central version: `1.1.2`, under active development version: `2.0.0-SNAPSHOT`.
+Latest Maven Central version: `1.1.2`; under active development version: `2.0.0-SNAPSHOT`.
 
 ## Quickstart
 
-### Dependencies
+### Showcase
+
+[A full demo of DDDplus forward/reverse modeling ->](dddplus-test/src/test/java/ddd/plus/showcase/README.md)
+
+### Forward modeling
 
 ```xml
 <dependency>
@@ -49,7 +53,7 @@ Latest Maven Central version: `1.1.2`, under active development version: `2.0.0-
 </dependency>
 ```
 
-### Integration with SpringBoot
+#### Integration with SpringBoot
 
 ```java
 @SpringBootApplication(scanBasePackages = {"${your base packages}", "io.github.dddplus"})
@@ -81,7 +85,10 @@ class ReverseModelingTest {
                         .analyze();
         new PlantUmlBuilder()
             .build(model)
-            .renderSvg("model.svg");
+            .renderSvg("model.svg"); // read-only searchable graph
+        new PlainTextBuilder()
+            .build(domainModel)
+            .render("model.txt"); // mutable, integrated with forward modeling design process
     }
 }
 ```
@@ -108,14 +115,6 @@ class ArchitectureGuardTest {
     }
 }
 ```
-
-## Modules Dependencies
-
-![](https://www.plantuml.com/plantuml/svg/ROz12WCX34NtdY8Nc0jqKUOUfGkhcQcWKKmijAUleq8PwYOyacVoNLbqbXAyyhW9I8JizgU0THcDk4XAcHXI92I1cxKs-S8B9pHtq0m7p8HSI5p0vWoUQRNiZfhLSIQz71VjtKVNEDqzTMPFaBQOJJy_UAQ5zwEkuAODLch4XUNQVdS1Ymd9ike9Z_vGVgDnOpexXVtVkjPQWly2)
-
-## Extension Framework Abstractions
-
-![](http://www.plantuml.com/plantuml/svg/VLJ1JXj13BtxAonwIKGJH7khLX4geH8z8CGFL6RNoOxOp4GURrC4-VTwo6IpoG8vnNvlxFSydhsAIgBjge7uvFoQX5POawysubJPuuAQo3qirbI5ZVFBejWuhV_iujaCLLg6XXUA6b3SibQid72fBdY0DPLFj6HSD-tIUIoANrQCxTWBeFsSLvO5bOotjnLxTVhym34qVrbEyNbOaVCt_vHzjDAdyBqreCU61_dGkFBvBKlU1wMa2-z9rBCCqweiVf1-jyP1oXR0iendTL0KRW9LISePKiIxIyZUfzCKGASKYzV9PE1hW0_c0XqNVs0PAXvbsHVPrSLExnYWf_OXjCQnr6DKeLBn9qNEoSDVg_Xb4UI6ohhhCXgV4fn4_H1-sNVOudd52sgR8-vyFa-ac6ILHcdtHz_7TbOC6yp1c2lIiXvro1Y6hDqGyu0-XFCsGDuMAttEUytNQS9MEXkSJlkJo_nKfLkr_ZWAoviho5WNmtNmIiwp71bEcvEkt_dV9ADqjr_HL8xx_CbabbyJG1QUzm2opM6u5XV4R1-znpXuZTqzNLgNrzaXFaQ_VOf-_nIzEqMt05Vig_GX-Wy0)
 
 ## Contribution
 
