@@ -24,6 +24,9 @@ import java.util.*;
  * @see <a href="https://www.augmentedmind.de/2021/01/17/plantuml-layout-tutorial-styles/">PlantUml Layout Guide</a>
  */
 public class PlantUmlBuilder implements IViewBuilder<PlantUmlBuilder> {
+    /**
+     * Direction to render the plantuml.
+     */
     public enum Direction {
         TopToBottom,
         LeftToRight,
@@ -372,7 +375,7 @@ public class PlantUmlBuilder implements IViewBuilder<PlantUmlBuilder> {
         append(" {method} ");
         append(entry.getMethodName())
                 .append(BRACKET_OPEN)
-                .append(entry.displayArgsWithRules())
+                .append(entry.displayEffectiveArgs())
                 .append(BRACKET_CLOSE)
                 .append(SPACE)
                 .append(entry.getJavadoc());

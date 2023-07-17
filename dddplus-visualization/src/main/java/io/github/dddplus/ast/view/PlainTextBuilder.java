@@ -12,6 +12,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * DSL -> Reverse Engineering Model -> Plain text file, git versioned.
+ */
 public class PlainTextBuilder implements IViewBuilder<PlainTextBuilder> {
     private static final String SPACE = " ";
     private static final String TAB = SPACE + SPACE + SPACE;
@@ -145,7 +148,7 @@ public class PlainTextBuilder implements IViewBuilder<PlainTextBuilder> {
                     append(TAB).append(TAB)
                             .append(entry.getMethodName())
                             .append("(")
-                            .append(entry.displayArgsWithRules())
+                            .append(entry.displayEffectiveArgs())
                             .append(")")
                             .append(SPACE)
                             .append(entry.getJavadoc())
@@ -239,7 +242,7 @@ public class PlainTextBuilder implements IViewBuilder<PlainTextBuilder> {
         for (KeyFlowEntry entry : orphanFlowsOfActor) {
             append(TAB).append(entry.displayNameWithRemark())
                     .append("(")
-                    .append(entry.displayArgsWithRules())
+                    .append(entry.displayEffectiveArgs())
                     .append(")")
                     .append(SPACE)
                     .append(entry.getJavadoc());
