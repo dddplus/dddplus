@@ -6,7 +6,7 @@ A lightweight DDD(Domain Driven Design) Enhancement Framework for complex busine
 
 [![CI](https://github.com/funkygao/cp-ddd-framework/workflows/CI/badge.svg?branch=master)](https://github.com/funkygao/cp-ddd-framework/actions?query=branch%3Amaster+workflow%3ACI)
 [![Javadoc](https://img.shields.io/badge/javadoc-Reference-blue.svg)](https://funkygao.github.io/cp-ddd-framework/doc/apidocs/)
-[![Mavenn Central](https://img.shields.io/maven-central/v/io.github.dddplus/dddplus.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:io.github.dddplus)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.dddplus/dddplus.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:io.github.dddplus)
 ![Requirement](https://img.shields.io/badge/JDK-8+-blue.svg)
 [![Coverage Status](https://img.shields.io/codecov/c/github/funkygao/cp-ddd-framework.svg)](https://codecov.io/gh/funkygao/cp-ddd-framework)
 [![Mentioned in Awesome DDD](https://awesome.re/mentioned-badge.svg)](https://github.com/heynickc/awesome-ddd#jvm)
@@ -36,13 +36,11 @@ In short, the 3 most essential `plus` are:
 
 Used for several complex critical central platform projects in production environment.
 
-Latest Maven Central version: `1.1.2`; under active development version: `2.0.0-SNAPSHOT`.
-
-## Quickstart
-
-### Showcase
+## Showcase
 
 [A full demo of DDDplus forward/reverse modeling ->](dddplus-test/src/test/java/ddd/plus/showcase/README.md)
+
+## Quickstart
 
 ### Forward modeling
 
@@ -73,7 +71,7 @@ public class Application {
 </dependency>
 ```
 
-Annotate your code With [DSL](/dddplus-spec/src/main/java/io/github/dddplus/dsl), DDDplus can render domain model in `PlantUML`.
+Annotate your code With [DSL](/dddplus-spec/src/main/java/io/github/dddplus/dsl), DDDplus can render domain model in multiple view.
 
 ```java
 class ReverseModelingTest {
@@ -83,12 +81,18 @@ class ReverseModelingTest {
         model = new DomainModelAnalyzer()
                         .scan("{your module root}")
                         .analyze();
-        new PlantUmlBuilder()
+        new PlantUmlRenderer()
             .build(model)
-            .renderSvg("model.svg"); // read-only searchable graph
-        new PlainTextBuilder()
-            .build(domainModel)
-            .render("model.txt"); // mutable, integrated with forward modeling design process
+            .classDiagramSvgFilename("model.svg")
+            .render(); // read-only searchable graph
+        new PlainTextRenderer()
+            .build(model)
+            .targetFilename("model.txt")
+            .render(); // mutable, integrated with forward modeling design process
+        new CallGraphRenderer()
+            .targetDotFilename("callgraph.dot")
+            .build(model)
+            .render(); // the call graph of your domain model
     }
 }
 ```
