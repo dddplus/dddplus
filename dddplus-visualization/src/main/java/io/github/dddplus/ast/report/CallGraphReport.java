@@ -2,6 +2,7 @@ package io.github.dddplus.ast.report;
 
 import io.github.dddplus.ast.ReverseEngineeringModel;
 import io.github.dddplus.ast.model.CallGraphEntry;
+import io.github.dddplus.ast.model.KeyModelEntry;
 import lombok.Data;
 
 import java.util.*;
@@ -27,21 +28,35 @@ public class CallGraphReport {
         return entries;
     }
 
-    public Collection<Record> calleeRecords() {
-        Map<String, Record> map = new TreeMap<>();
+    private Set<String> calleeClasses() {
+        Set<String> r = new TreeSet<>();
         for (CallGraphEntry entry : entries) {
-            final String calleeClazz = entry.getCalleeClazz();
-            if (!map.containsKey(calleeClazz)) {
-                map.put(entry.getCalleeClazz(), new Record(calleeClazz));
-            }
-
-            map.get(calleeClazz).addMethod(entry.getCalleeMethod());
+            r.add(entry.getCalleeClazz());
         }
+        return r;
+    }
 
-        return map.values();
+    public Collection<Record> calleeRecords() {
+        List<Record> records = new ArrayList<>();
+        for (String calleeClass : calleeClasses()) {
+            Record record = new Record(calleeClass);
+            record.addMethods(model.getKeyModelReport().keyModelEntryOfActor(calleeClass).realKeyMethods());
+
+            records.add(record);
+        }
+        return records;
     }
 
     public void register(String callerClazz, String callerMethod, String calleeClazz, String calleeMethod) {
+        if (!model.getKeyModelReport().containsActor(calleeClazz)) {
+            // 被调用的方法不是我们标注的，例如 BigDecimal::add
+            return;
+        }
+
+        KeyModelEntry keyModelEntry = model.getKeyModelReport().keyModelEntryOfActor(calleeClazz);
+        if (!keyModelEntry.hasKeyMethod(calleeMethod)) {
+            keyModelEntry.registerMethodFodCallGraph(calleeMethod);
+        }
         entries.add(new CallGraphEntry(callerClazz, callerMethod, calleeClazz, calleeMethod));
     }
 
@@ -54,8 +69,8 @@ public class CallGraphReport {
             this.clazz = clazz;
         }
 
-        void addMethod(String method) {
-            methods.add(method);
+        void addMethods(Set<String> methods) {
+            this.methods.addAll(methods);
         }
     }
 }
