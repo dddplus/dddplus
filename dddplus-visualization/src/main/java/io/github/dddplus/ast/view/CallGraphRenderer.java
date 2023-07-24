@@ -1,6 +1,11 @@
+/*
+ * Copyright DDDplus Authors.
+ *
+ * Licensed under the Apache License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
 package io.github.dddplus.ast.view;
 
-import io.github.dddplus.ast.ReverseEngineeringModel;
+import io.github.dddplus.ast.model.ReverseEngineeringModel;
 import io.github.dddplus.ast.model.CallGraphEntry;
 import io.github.dddplus.ast.report.CallGraphReport;
 
@@ -13,19 +18,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * DSL -> Reverse Engineering Model -> method call -> dot DSL.
+ */
 public class CallGraphRenderer implements IModelRenderer<CallGraphRenderer> {
     private CallGraphReport callGraphReport;
     private String targetDotFilename;
-    private boolean edgeShowsCallerMethod = false;
     private String splines = null;
+    private StringBuilder content = new StringBuilder();
 
     public CallGraphRenderer targetDotFilename(String targetFile) {
         this.targetDotFilename = targetFile;
-        return this;
-    }
-
-    public CallGraphRenderer edgeShowsCallerMethod() {
-        this.edgeShowsCallerMethod = true;
         return this;
     }
 
@@ -48,52 +51,13 @@ public class CallGraphRenderer implements IModelRenderer<CallGraphRenderer> {
 
     @Override
     public void render() throws IOException {
-        StringBuilder content = new StringBuilder();
-        content.append("digraph G {").append(NEWLINE);
-        content.append(TAB).append("labelloc = \"t\";").append(NEWLINE);
-        content.append(TAB).append("rankdir=LR;").append(NEWLINE);
-        if (splines != null) {
-            content.append(TAB).append(String.format("splines = %s;", splines)).append(NEWLINE);
-        }
-        content.append(TAB).append("node [shape=record];").append(NEWLINE);
-        content.append(TAB).append("edge [style = dashed, fontsize=10];").append(NEWLINE);
-        content.append(NEWLINE);
-
-        for (CallGraphReport.Record calleeClazz : callGraphReport.calleeRecords()) {
-            content.append(TAB).append(calleeClazz.getClazz())
-                    .append(" [label=\"");
-            List<String> list = new ArrayList<>();
-            list.add(String.format("<%s> %s", calleeClazz.getClazz(), calleeClazz.getClazz()));
-            for (String method : calleeClazz.getMethods()) {
-                list.add(String.format("<%s> %s", method, method));
-            }
-            content.append(String.join("|", list));
-            content.append("\"];").append(NEWLINE);
-        }
-
-        content.append(NEWLINE);
-
-        Set<String> edges = new HashSet<>();
-        for (CallGraphEntry entry : callGraphReport.sortedEntries()) {
-            if (!edgeShowsCallerMethod) {
-                // A的多个方法可能调用同一个callee：merge
-                String key = entry.getCallerClazz() + ":" + entry.calleeNode();
-                if (edges.contains(key)) {
-                    continue;
-                }
-                edges.add(key);
-            }
-
-            content.append(TAB).append(entry.getCallerClazz()).append(" -> ")
-                    .append(entry.calleeNode());
-            if (edgeShowsCallerMethod) {
-                content.append(" [label=\"")
-                        .append(entry.getCallerMethod())
-                        .append("\"];");
-            }
-            content.append(NEWLINE);
-        }
-        content.append("}");
+        append("digraph G {")
+                .append(NEWLINE)
+                .setupSkin()
+                .renderNodes()
+                .append(NEWLINE)
+                .renderEdges()
+                .append("}");
 
         File file = new File(targetDotFilename);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
@@ -101,5 +65,55 @@ public class CallGraphRenderer implements IModelRenderer<CallGraphRenderer> {
         }
 
         // dot -Tsvg a.dot -o a.svg
+    }
+
+    private CallGraphRenderer setupSkin() {
+        append(TAB).append("labelloc = \"t\";").append(NEWLINE);
+        append(TAB).append("rankdir=LR;").append(NEWLINE);
+        if (splines != null) {
+            append(TAB).append(String.format("splines = %s;", splines)).append(NEWLINE);
+        }
+        append(TAB).append("node [shape=record];").append(NEWLINE);
+        append(TAB).append("edge [style = dashed, fontsize=10];").append(NEWLINE);
+        append(NEWLINE);
+        return this;
+    }
+
+    private CallGraphRenderer renderNodes() {
+        for (CallGraphReport.Record calleeClazz : callGraphReport.calleeRecords()) {
+            append(TAB).append(calleeClazz.getClazz())
+                    .append(" [label=\"");
+            List<String> list = new ArrayList<>();
+            list.add(String.format("<%s> %s", calleeClazz.getClazz(), calleeClazz.getClazz()));
+            for (String method : calleeClazz.getMethods()) {
+                list.add(String.format("<%s> %s", method, method));
+            }
+            append(String.join("|", list));
+            append("\"];").append(NEWLINE);
+        }
+        return this;
+    }
+
+    private CallGraphRenderer renderEdges() {
+        Set<String> edges = new HashSet<>();
+        for (CallGraphEntry entry : callGraphReport.sortedEntries()) {
+            // A的多个方法可能调用同一个callee：merge
+            String key = entry.getCallerClazz() + ":" + entry.calleeNode();
+            if (edges.contains(key)) {
+                continue;
+            }
+            edges.add(key);
+
+            append(TAB).append(entry.callerNode(callGraphReport))
+                    .append(" -> ")
+                    .append(entry.calleeNode())
+                    .append(NEWLINE);
+        }
+        return this;
+    }
+
+    private CallGraphRenderer append(String s) {
+        content.append(s);
+        return this;
     }
 }

@@ -1,3 +1,10 @@
+## Release Notes - DDDplus - 2.0.1-SNAPSHOT
+
+* Feature
+   * add ExtensionMethodSignatureEnforcer to avoid NPE risk
+   * call graph complete and exact click through
+   - add dddplus-maven-plugin
+
 ## Release Notes - DDDplus - 2.0.0-SNAPSHOT
 
 * FIXED

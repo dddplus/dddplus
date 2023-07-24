@@ -1,6 +1,11 @@
+/*
+ * Copyright DDDplus Authors.
+ *
+ * Licensed under the Apache License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
 package io.github.dddplus.ast.report;
 
-import io.github.dddplus.ast.ReverseEngineeringModel;
+import io.github.dddplus.ast.model.ReverseEngineeringModel;
 import io.github.dddplus.ast.model.CallGraphEntry;
 import io.github.dddplus.ast.model.KeyModelEntry;
 import lombok.Data;
@@ -28,6 +33,10 @@ public class CallGraphReport {
         return entries;
     }
 
+    public boolean isKeyModel(String clazz) {
+        return model.getKeyModelReport().containsActor(clazz);
+    }
+
     private Set<String> calleeClasses() {
         Set<String> r = new TreeSet<>();
         for (CallGraphEntry entry : entries) {
@@ -53,10 +62,15 @@ public class CallGraphReport {
             return;
         }
 
-        KeyModelEntry keyModelEntry = model.getKeyModelReport().keyModelEntryOfActor(calleeClazz);
-        if (!keyModelEntry.hasKeyMethod(calleeMethod)) {
-            keyModelEntry.registerMethodFodCallGraph(calleeMethod);
+        KeyModelEntry calleeModel = model.getKeyModelReport().keyModelEntryOfActor(calleeClazz);
+        if (!calleeModel.hasKeyMethod(calleeMethod)) {
+            calleeModel.registerMethodFodCallGraph(calleeMethod);
         }
+        KeyModelEntry callerModel = model.getKeyModelReport().keyModelEntryOfActor(callerClazz);
+        if (callerModel != null && !callerModel.hasKeyMethod(callerMethod)) {
+            callerModel.registerMethodFodCallGraph(callerMethod);
+        }
+
         entries.add(new CallGraphEntry(callerClazz, callerMethod, calleeClazz, calleeMethod));
     }
 

@@ -1,8 +1,12 @@
 package ddd.plus.showcase.reverse;
 
+import io.github.dddplus.DDDPlusEnforcer;
 import io.github.dddplus.ast.*;
-import io.github.dddplus.ast.report.EncapsulationReport;
+import io.github.dddplus.ast.enforcer.AllowedAccessorsEnforcer;
+import io.github.dddplus.ast.enforcer.ExtensionMethodSignatureEnforcer;
+import io.github.dddplus.ast.model.ReverseEngineeringModel;
 import io.github.dddplus.ast.view.CallGraphRenderer;
+import io.github.dddplus.ast.view.EncapsulationRenderer;
 import io.github.dddplus.ast.view.PlainTextRenderer;
 import io.github.dddplus.ast.view.PlantUmlRenderer;
 import org.junit.jupiter.api.Disabled;
@@ -29,6 +33,13 @@ class WmsReverseModelingTest {
                 .build(model)
                 .classDiagramSvgFilename("../doc/wms.svg")
                 .render();
+    }
+
+    @Test
+    void callGraph() throws IOException {
+        ReverseEngineeringModel model = new DomainModelAnalyzer()
+                .scan(root)
+                .analyze(domainLayerFilter);
         new CallGraphRenderer()
                 .targetDotFilename("../doc/callgraph.dot")
                 .splines("polyline")
@@ -69,10 +80,13 @@ class WmsReverseModelingTest {
 
     @Test
     void generateEncapsulationReport() throws IOException {
-        EncapsulationReport report = new DomainModelAnalyzer()
+        ReverseEngineeringModel model = new DomainModelAnalyzer()
                 .scan(root)
                 .analyzeEncapsulation(domainLayerFilter);
-        report.dump(new File("../doc/encapsulation.txt"));
+        new EncapsulationRenderer()
+                .build(model)
+                .targetFilename("../doc/encapsulation.txt")
+                .render();
     }
 
     @Test
@@ -86,6 +100,13 @@ class WmsReverseModelingTest {
     void enforceExtensionMethodSignature() throws IOException {
         new ExtensionMethodSignatureEnforcer()
                 .scan(root)
+                .enforce();
+    }
+
+    @Test
+    void dddplusEnforce() {
+        new DDDPlusEnforcer()
+                .scanPackages("ddd.plus.showcase.wms")
                 .enforce();
     }
 

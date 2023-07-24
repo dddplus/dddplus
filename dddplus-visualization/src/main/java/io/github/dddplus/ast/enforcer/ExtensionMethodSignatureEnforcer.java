@@ -1,10 +1,17 @@
-package io.github.dddplus.ast;
+/*
+ * Copyright DDDplus Authors.
+ *
+ * Licensed under the Apache License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
+package io.github.dddplus.ast.enforcer;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import io.github.dddplus.ast.DomainModelAnalyzer;
+import io.github.dddplus.ast.FileWalker;
 import io.github.dddplus.ext.IDomainExtension;
 import lombok.extern.slf4j.Slf4j;
 
