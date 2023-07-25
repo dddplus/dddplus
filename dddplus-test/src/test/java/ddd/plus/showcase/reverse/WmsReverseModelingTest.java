@@ -1,7 +1,9 @@
 package ddd.plus.showcase.reverse;
 
 import io.github.dddplus.DDDPlusEnforcer;
-import io.github.dddplus.ast.*;
+import io.github.dddplus.ast.DomainModelAnalyzer;
+import io.github.dddplus.ast.DomainModelAnalyzerTest;
+import io.github.dddplus.ast.FileWalker;
 import io.github.dddplus.ast.enforcer.AllowedAccessorsEnforcer;
 import io.github.dddplus.ast.enforcer.ExtensionMethodSignatureEnforcer;
 import io.github.dddplus.ast.model.ReverseEngineeringModel;
@@ -31,7 +33,7 @@ class WmsReverseModelingTest {
                 .direction(PlantUmlRenderer.Direction.TopToBottom)
                 .skinParamPolyline()
                 .build(model)
-                .classDiagramSvgFilename("../doc/wms.svg")
+                .classDiagramSvgFilename("../doc/showcase/wms.svg")
                 .render();
     }
 
@@ -41,7 +43,8 @@ class WmsReverseModelingTest {
                 .scan(root)
                 .analyze(domainLayerFilter);
         new CallGraphRenderer()
-                .targetDotFilename("../doc/callgraph.dot")
+                .targetCallGraphDotFile("../doc/showcase/callgraph.dot")
+                .targetPackageCrossRefDotFile("../doc/showcase/pkgref.dot")
                 .splines("polyline")
                 .build(model)
                 .render();
@@ -59,7 +62,7 @@ class WmsReverseModelingTest {
                 .disableCoverage()
                 .skinParamPolyline()
                 .build(model)
-                .classDiagramSvgFilename("../doc/tech.svg")
+                .classDiagramSvgFilename("../doc/showcase/tech.svg")
                 .render();
     }
 
@@ -73,7 +76,7 @@ class WmsReverseModelingTest {
         new PlainTextRenderer()
                 .showRawSimilarities()
                 .clustering()
-                .targetFilename("../doc/wms.txt")
+                .targetFilename("../doc/showcase/wms.txt")
                 .build(model)
                 .render();
     }
@@ -85,7 +88,7 @@ class WmsReverseModelingTest {
                 .analyzeEncapsulation(domainLayerFilter);
         new EncapsulationRenderer()
                 .build(model)
-                .targetFilename("../doc/encapsulation.txt")
+                .targetFilename("../doc/showcase/encapsulation.txt")
                 .render();
     }
 
