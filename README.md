@@ -2,7 +2,7 @@
 
 <div align="center">
 
-A lightweight DDD(Domain Driven Design) Enhancement Framework for complex business architecture.
+A lightweight DDD(Domain Driven Design) enhancement framework for forward/reverse business modeling, supporting complex system architecture evolution!
 
 [![CI](https://github.com/funkygao/cp-ddd-framework/workflows/CI/badge.svg?branch=master)](https://github.com/funkygao/cp-ddd-framework/actions?query=branch%3Amaster+workflow%3ACI)
 [![Javadoc](https://img.shields.io/badge/javadoc-Reference-blue.svg)](https://funkygao.github.io/cp-ddd-framework/doc/apidocs/)
@@ -23,14 +23,14 @@ Languages： English | [中文](README.zh-cn.md)
 
 ## What is DDDplus?
 
-DDDplus, originally cp-ddd-framework(cp means Central Platform：中台), is a lightweight DDD Enhancement Framework for complex business architecture. 
+DDDplus, originally cp-ddd-framework(cp means Central Platform：中台), is a lightweight DDD(Domain Driven Design) enhancement framework for forward/reverse business modeling, supporting complex system architecture evolution!
 
 >It captures DDD missing concepts and patches the building block. It empowers building domain model with forward and reverse modeling. It visualizes the complete domain knowledge from code. It connects frontline developers with (architect, product manager, business stakeholder, management team). It makes (analysis, design, design review, implementation, code review, test) a positive feedback closed-loop. It strengthens building extension oriented flexible software solution. It eliminates frequently encountered misunderstanding of DDD via thorough javadoc for each building block with detailed example.
 
 In short, the 3 most essential `plus` are:
-1. provide [extension point](/dddplus-spec/src/main/java/io/github/dddplus/ext) with multiple routing mechanism, suited for complex business scenarios
-2. [patch](/dddplus-spec/src/main/java/io/github/dddplus/model) DDD building blocks for pragmatic forward modeling, clearing obstacles of DDD implementation
-3. offer a reverse modeling [DSL](/dddplus-spec/src/main/java/io/github/dddplus/dsl), visualizing complete domain knowledge from code
+1. [patch](/dddplus-spec/src/main/java/io/github/dddplus/model) DDD building blocks for pragmatic forward modeling, clearing obstacles of DDD implementation
+2. offer a reverse modeling [DSL](/dddplus-spec/src/main/java/io/github/dddplus/dsl), visualizing complete domain knowledge from code
+3. provide [extension point](/dddplus-spec/src/main/java/io/github/dddplus/ext) with multiple routing mechanism, suited for complex business scenarios
 
 ## Current status
 
@@ -64,6 +64,8 @@ public class Application {
 
 ### Reverse Modeling
 
+Please check out the [step by step guide](doc/ReverseModelingGuide.md).
+
 ```xml
 <dependency>
     <groupId>io.github.dddplus</groupId>
@@ -71,7 +73,7 @@ public class Application {
 </dependency>
 ```
 
-Annotate your code With [DSL](/dddplus-spec/src/main/java/io/github/dddplus/dsl), DDDplus can render domain model in multiple view.
+Annotate your code With [DSL](/dddplus-spec/src/main/java/io/github/dddplus/dsl), DDDplus can render domain model in multiple views.
 
 ```java
 class ReverseModelingTest {
@@ -83,41 +85,29 @@ class ReverseModelingTest {
                         .analyze();
         new PlantUmlRenderer()
             .build(model)
-            .classDiagramSvgFilename("model.svg")
-            .render(); // read-only searchable graph
+            .classDiagramSvgFilename("model.svg") // structure/relations of your business model
+            .render();
         new PlainTextRenderer()
             .build(model)
-            .targetFilename("model.txt")
-            .render(); // mutable, integrated with forward modeling design process
+            .targetFilename("model.txt") // new feature design starts from here, change it as you design
+            .render();
         new CallGraphRenderer()
-            .targetDotFilename("callgraph.dot")
+            .targetDotFilename("callgraph.dot") // the method call graph
+            .targetPackageCrossRefDotFile("pkgref.dot") // the package cross reference relationship
             .build(model)
-            .render(); // the call graph of your domain model
+            .render();
+        new EncapsulationRenderer()
+            .build(model)
+            .targetFilename("encapsulation.txt") // did you have good encapsulation?
+            .render();
     }
 }
 ```
 
 ### Architecture Guard
 
-```xml
-<dependency>
-    <groupId>io.github.dddplus</groupId>
-    <artifactId>dddplus-enforce</artifactId>
-    <scope>test</scope>
-</dependency>
-```
-
-Enable it by writing unit test and integrate it with CI flow.
-
-```java
-class ArchitectureGuardTest {
-    @Test
-    void enforcement() {
-        new DDDPlusEnforcer()
-                .scanPackages("${your base package}")
-                .enforce();
-    }
-}
+```bash
+mvn io.github.dddplus:dddplus-maven-plugin:enforce -DrootPackage={your pkg} -DrootDir={your src dir}
 ```
 
 ## Contribution

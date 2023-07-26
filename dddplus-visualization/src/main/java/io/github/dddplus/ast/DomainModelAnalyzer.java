@@ -26,7 +26,6 @@ public class DomainModelAnalyzer {
     private double similarityThreshold = 25; // 25%
     private Set<String> ignoredAnnotations = new HashSet<>(); // in simpleName
     private boolean rawSimilarity = false;
-    private boolean debugMode = false;
 
     public DomainModelAnalyzer scan(File... dirs) {
         this.dirs = dirs;
@@ -35,11 +34,6 @@ public class DomainModelAnalyzer {
 
     public DomainModelAnalyzer rawSimilarity() {
         this.rawSimilarity = true;
-        return this;
-    }
-
-    public DomainModelAnalyzer debug() {
-        this.debugMode = true;
         return this;
     }
 
@@ -154,7 +148,6 @@ public class DomainModelAnalyzer {
         JaccardModelSimilarity similarityAnalyzer = new JaccardModelSimilarity();
         List<KeyModelEntry> keyModelEntries = new ArrayList<>(model.getKeyModelReport().getData().values());
         for (int i = 0; i < keyModelEntries.size(); i++) {
-            log.debug("fan out similarity of {}", keyModelEntries.get(i).getClassName());
             for (int j = i + 1; j < keyModelEntries.size(); j++) {
                 KeyModelEntry model1 = keyModelEntries.get(i);
                 KeyModelEntry model2 = keyModelEntries.get(j);
@@ -176,7 +169,6 @@ public class DomainModelAnalyzer {
             log.debug("calculating raw models similarity");
             List<KeyModelEntry> rawModels = new ArrayList<>(model.getKeyModelReport().getRawModels().values());
             for (int i = 0; i < rawModels.size(); i++) {
-                log.debug("fan out similarity of raw model {}", rawModels.get(i).getClassName());
                 for (int j = i + 1; j < rawModels.size(); j++) {
                     KeyModelEntry model1 = rawModels.get(i);
                     KeyModelEntry model2 = rawModels.get(j);
@@ -249,6 +241,7 @@ public class DomainModelAnalyzer {
         }
 
         // call graph
+        log.debug("call graph");
         CallGraphAstNodeVisitor callGraphAstNodeVisitor = new CallGraphAstNodeVisitor(dirs);
         for (File dir : dirs) {
             log.debug("parsing {}", CallGraphAstNodeVisitor.class.getSimpleName());
