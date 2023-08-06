@@ -45,9 +45,18 @@ class WmsReverseModelingTest {
         new CallGraphRenderer()
                 .targetCallGraphDotFile("../doc/showcase/callgraph.dot")
                 .targetPackageCrossRefDotFile("../doc/showcase/pkgref.dot")
+                .edgeShowsCallerMethod()
                 .splines("polyline")
                 .build(model)
                 .render();
+    }
+
+    @Test
+    void dumpModel() throws Exception {
+        ReverseEngineeringModel model = new DomainModelAnalyzer()
+                .scan(root)
+                .analyze(domainLayerFilter);
+        model.dump("../doc/model.db");
     }
 
     @Test

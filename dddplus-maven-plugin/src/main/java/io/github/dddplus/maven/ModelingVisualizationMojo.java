@@ -31,7 +31,7 @@ public class ModelingVisualizationMojo extends AbstractMojo {
     /**
      * Colon separated directories.
      */
-    @Parameter(property = "rootDir")
+    @Parameter(property = "rootDir", required = true)
     String rootDir;
 
     @Parameter(property = "callGraph")
@@ -48,14 +48,11 @@ public class ModelingVisualizationMojo extends AbstractMojo {
     Boolean rawClassSimilarity = false;
     @Parameter(property = "similarityThreshold")
     Integer similarityThreshold = 70;
+    @Parameter(property = "sqliteDb")
+    String sqliteDb;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (rootDir == null) {
-            getLog().error("Usage: mvn io.github.dddplus:dddplus-maven-plugin:visualize -DrootDir=xx -DcallGraph=xx.dot -DpkgRef=xx.dot -DplantUml=xx.svg -Dencapsulation=xxx.txt -DtextModel=xx.txt");
-            return;
-        }
-
         getLog().info("Reverse modeling starting ...");
         try {
             String[] dirPaths = rootDir.split(":");
@@ -111,7 +108,13 @@ public class ModelingVisualizationMojo extends AbstractMojo {
 
             getLog().info("Reverse Modeling Executed OK");
             getLog().info("Please check out your modeling artifacts: " + String.join(", ", artifacts));
-        } catch (IOException e) {
+
+            if (sqliteDb != null) {
+                getLog().info("Dump model to sqlite:" + sqliteDb);
+                model.dump(sqliteDb);
+                getLog().info("Please check out your model in sqlite:" + sqliteDb);
+            }
+        } catch (Exception e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
     }
