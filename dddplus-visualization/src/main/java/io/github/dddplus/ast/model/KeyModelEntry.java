@@ -14,6 +14,8 @@ import java.util.*;
 
 @Getter
 public class KeyModelEntry {
+    private static final int propertiesPerLine = 5;
+
     private static final Set<String> EMPTY_SET = new HashSet();
     private static final Set<KeyPropertyEntry> EMPTY_PROPERTIES = new HashSet<>();
 
@@ -37,6 +39,21 @@ public class KeyModelEntry {
     public KeyModelEntry(String className) {
         this.className = className;
         this.properties = new TreeMap<>();
+    }
+
+    public List<KeyBehaviorEntry> sortedKeyBehaviorEntries() {
+        Collections.sort(keyBehaviorEntries, Comparator.comparing(KeyBehaviorEntry::getMethodName));
+        return keyBehaviorEntries;
+    }
+
+    public List<KeyRuleEntry> sortedKeyRuleEntries() {
+        Collections.sort(keyRuleEntries, Comparator.comparing(KeyRuleEntry::getMethodName));
+        return keyRuleEntries;
+    }
+
+    public List<KeyFlowEntry> sortedKeyFlowEntries() {
+        Collections.sort(keyFlowEntries, Comparator.comparing(KeyFlowEntry::getMethodName));
+        return keyFlowEntries;
     }
 
     // TODO 这里没有处理方法重载
@@ -188,7 +205,7 @@ public class KeyModelEntry {
             return EMPTY_PROPERTIES;
         }
 
-        return new HashSet<>(propertiesOfType);
+        return new TreeSet<>(propertiesOfType);
     }
 
     public String displayUndefinedTypes() {
@@ -206,9 +223,14 @@ public class KeyModelEntry {
 
     public String displayFieldByType(KeyElement.Type type) {
         Set<KeyPropertyEntry> propertyEntries = keyPropertiesByType(type);
-        Set<String> fields = new TreeSet<>();
+        List<String> fields = new ArrayList<>();
+        int n = 0;
         for (KeyPropertyEntry entry : propertyEntries) {
             fields.add(entry.displayName());
+            n++;
+            if (n % propertiesPerLine == 0) {
+                fields.add("\n");
+            }
         }
 
         return String.join(" ", fields);

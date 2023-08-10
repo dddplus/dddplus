@@ -98,12 +98,12 @@ class CallGraphAstNodeVisitor extends VoidVisitorAdapter<CallGraphReport> {
         try {
             methodDeclaration = javaParserFacade.solve(methodCallExpr, true);
         } catch (Exception ignored) {
-            log.warn("method:{} scope:{} {}", methodCallExpr.getNameAsString(), scope, ignored.getMessage());
+            log.debug("method:{} scope:{} {}", methodCallExpr.getNameAsString(), scope, ignored.getMessage());
             return;
         }
 
         if (!methodDeclaration.isSolved()) {
-            log.error("method:{} methodCallExpr:{} cannot be solved", methodCallExpr.getNameAsString(), methodCallExpr.toString());
+            log.debug("method:{} methodCallExpr:{} cannot be solved", methodCallExpr.getNameAsString(), methodCallExpr.toString());
             return;
         }
 

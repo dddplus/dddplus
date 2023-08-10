@@ -28,11 +28,13 @@ class WmsReverseModelingTest {
     void visualizeDomainModel() throws IOException {
         ReverseEngineeringModel model = new DomainModelAnalyzer()
                 .scan(root)
+                .disableCallGraph()
                 .analyze(domainLayerFilter);
         new PlantUmlRenderer()
                 .direction(PlantUmlRenderer.Direction.TopToBottom)
                 .skinParamPolyline()
                 .build(model)
+                .plantUmlFilename("../doc/showcase/wms.puml")
                 .classDiagramSvgFilename("../doc/showcase/wms.svg")
                 .render();
     }
@@ -55,6 +57,7 @@ class WmsReverseModelingTest {
     void dumpModel() throws Exception {
         ReverseEngineeringModel model = new DomainModelAnalyzer()
                 .scan(root)
+                .disableCallGraph()
                 .analyze(domainLayerFilter);
         model.dump("../doc/model.db");
     }
