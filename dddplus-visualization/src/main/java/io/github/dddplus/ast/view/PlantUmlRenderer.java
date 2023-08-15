@@ -48,7 +48,6 @@ public class PlantUmlRenderer implements IModelRenderer<PlantUmlRenderer> {
 
     // https://plantuml.com/zh/color
     private static final String COLOR_BEHAVIOR_PRODUCE_EVENT = "Violet";
-    private static final String COLOR_FLOW_ACTUAL_CLASS = "Olive";
 
     private String classDiagramSvgFilename;
     private String plantUmlFilename;
@@ -133,7 +132,7 @@ public class PlantUmlRenderer implements IModelRenderer<PlantUmlRenderer> {
         addNotes();
 
         // aggregates
-        append("package 逆向业务模型 {").append(NEWLINE);
+        append("package 业务模型层 {").append(NEWLINE);
         model.aggregates().forEach(a -> addAggregate(a));
         append(BRACE_CLOSE).append(NEWLINE);
 
@@ -228,8 +227,12 @@ public class PlantUmlRenderer implements IModelRenderer<PlantUmlRenderer> {
 
     private PlantUmlRenderer writeKeyUsecaseClazzDefinition(String actor) {
         append("class ").append(actor);
+        String actorJavadoc = model.getKeyUsecaseReport().actorJavadoc(actor);
+        if (actorJavadoc != null && !actorJavadoc.isEmpty()) {
+            append(String.format(" <<(C,#9197DB) %s>> ", actorJavadoc));
+        }
         append(" {").append(NEWLINE);
-        for (KeyUsecaseEntry entry : model.getKeyUsecaseReport().actorKeyUsecases(actor)) {
+        for (KeyUsecaseEntry entry : model.getKeyUsecaseReport().sortedActorKeyUsecases(actor)) {
             append("    {method} ");
             if (!entry.displayOut().isEmpty()) {
                 append(entry.displayOut()).append(SPACE);
@@ -262,6 +265,12 @@ public class PlantUmlRenderer implements IModelRenderer<PlantUmlRenderer> {
                 append(String.format(" <<(B,#9197DB) %s>> ", keyModelEntry.getJavadoc()));
             } else {
                 append(" <<(B,#9197DB)>> ");
+            }
+        } else if (keyModelEntry.isEnumType()) {
+            if (keyModelEntry.hasJavadoc()) {
+                append(String.format(" <<(D,#9197DB) %s>> ", keyModelEntry.getJavadoc()));
+            } else {
+                append(" <<(D,#9197DB)>> ");
             }
         } else {
             if (keyModelEntry.hasJavadoc()) {
@@ -343,17 +352,24 @@ public class PlantUmlRenderer implements IModelRenderer<PlantUmlRenderer> {
             append(" {static} ");
         }
         append(" {method} ");
+        if (entry.isNonPublic()) {
+            append("- ");
+        }
+        if (entry.isUsecase()) {
+            append("+ ");
+        }
         append(entry.getMethodName())
                 .append(BRACKET_OPEN)
                 .append(entry.displayEffectiveArgs())
                 .append(BRACKET_CLOSE)
                 .append(SPACE)
                 .append(entry.getJavadoc());
-        if (keyModelEntry != null && !keyModelEntry.getClassName().equals(entry.displayActualClass())) {
-            append(SPACE)
-                    .append(MessageFormat.format(COLOR_TMPL_OPEN, COLOR_FLOW_ACTUAL_CLASS))
-                    .append(entry.displayActualClass()).append(SPACE)
-                    .append(COLOR_TMPL_CLOSE);
+        if (entry.getRemark() != null && !entry.getRemark().isEmpty()) {
+            append(SPACE).append(entry.getRemark());
+        }
+        if (keyModelEntry != null && !keyModelEntry.getClassName().equals(entry.umlDisplayActualClass())) {
+            // 以IDEA url link形式展示实际类的位置：可点击
+            append(SPACE).append(entry.umlDisplayActualClass()).append(SPACE);
         }
         if (entry.produceEvent()) {
             append(MessageFormat.format(COLOR_TMPL_OPEN, COLOR_BEHAVIOR_PRODUCE_EVENT));
@@ -374,6 +390,8 @@ public class PlantUmlRenderer implements IModelRenderer<PlantUmlRenderer> {
         if (header != null && !header.isEmpty()) {
             append(header).append(NEWLINE);
         }
+        // legend
+        append("Legend R:聚合根 B:BehaviorOnly D:Dict C:Class E:Event").append(NEWLINE);
         CoverageReport report = model.coverageReport();
         append(String.format("公共类：%d，标注：%d，覆盖率：%.1f%%", report.getPublicClazzN(), report.getAnnotatedClazzN(), report.clazzCoverage()));
         append(NEWLINE);
@@ -432,7 +450,7 @@ public class PlantUmlRenderer implements IModelRenderer<PlantUmlRenderer> {
     }
 
     private PlantUmlRenderer addAggregate(AggregateEntry aggregate) {
-        append(MessageFormat.format(PACKAGE_TMPL, "Aggregate：" + aggregate.getName(), aggregate.getPackageName()));
+        append(MessageFormat.format(PACKAGE_TMPL, aggregate.getName(), aggregate.getPackageName()));
         append(SPACE).append(BRACE_OPEN).append(NEWLINE);
         for (KeyModelEntry clazz : aggregate.keyModels()) {
             append(TAB).writeClazzDefinition(clazz, aggregate.isRoot(clazz)).append(NEWLINE);
@@ -498,7 +516,7 @@ public class PlantUmlRenderer implements IModelRenderer<PlantUmlRenderer> {
             return this;
         }
 
-        append(MessageFormat.format(PACKAGE_TMPL, "交互", "UseCase"));
+        append(MessageFormat.format(PACKAGE_TMPL, "业务交互层", "UseCase"));
         append(SPACE).append(BRACE_OPEN).append(NEWLINE);
         for (String actor : model.getKeyUsecaseReport().getData().keySet()) {
             append(TAB).writeKeyUsecaseClazzDefinition(actor).append(NEWLINE);

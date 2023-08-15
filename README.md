@@ -99,21 +99,16 @@ class ReverseModelingTest {
                         .scan("{your module root}")
                         .analyze();
         new PlantUmlRenderer()
-            .build(model)
             .classDiagramSvgFilename("model.svg") // structure/relations of your business model
+            .build(model)
             .render();
         new PlainTextRenderer()
-            .build(model)
             .targetFilename("model.txt") // new feature design starts from here, change it as you design
+            .build(model)
             .render();
         new CallGraphRenderer()
             .targetDotFilename("callgraph.dot") // the method call graph
-            .targetPackageCrossRefDotFile("pkgref.dot") // the package cross reference relationship
             .build(model)
-            .render();
-        new EncapsulationRenderer()
-            .build(model)
-            .targetFilename("encapsulation.txt") // did you have good encapsulation?
             .render();
     }
 }
@@ -122,7 +117,9 @@ class ReverseModelingTest {
 ### Architecture Guard
 
 ```bash
-mvn io.github.dddplus:dddplus-maven-plugin:enforce -DrootPackage={your pkg} -DrootDir={your src dir}
+mvn io.github.dddplus:dddplus-maven-plugin:enforce \
+    -DrootPackage={your pkg} \
+    -DrootDir={your src dir}
 ```
 
 ## Contribution

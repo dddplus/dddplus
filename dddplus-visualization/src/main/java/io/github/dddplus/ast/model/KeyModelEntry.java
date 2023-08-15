@@ -24,6 +24,9 @@ public class KeyModelEntry {
     private final String className;
     @Setter
     private String javadoc;
+    // 这个类是个枚举
+    @Setter
+    private boolean enumType = false;
 
     private final Map<KeyElement.Type, List<KeyPropertyEntry>> properties;
     private final Set<String> rawFields = new HashSet<>();
@@ -52,7 +55,7 @@ public class KeyModelEntry {
     }
 
     public List<KeyFlowEntry> sortedKeyFlowEntries() {
-        Collections.sort(keyFlowEntries, Comparator.comparing(KeyFlowEntry::getMethodName));
+        Collections.sort(keyFlowEntries, Comparator.comparing(KeyFlowEntry::getSortedKey));
         return keyFlowEntries;
     }
 
@@ -208,25 +211,12 @@ public class KeyModelEntry {
         return new TreeSet<>(propertiesOfType);
     }
 
-    public String displayUndefinedTypes() {
-        List<KeyElement.Type> types = undefinedTypes();
-        if (types.isEmpty()) {
-            return "";
-        }
-
-        StringJoiner joiner = new StringJoiner(" ");
-        for (KeyElement.Type t : types) {
-            joiner.add(t.toString());
-        }
-        return joiner.toString();
-    }
-
     public String displayFieldByType(KeyElement.Type type) {
         Set<KeyPropertyEntry> propertyEntries = keyPropertiesByType(type);
         List<String> fields = new ArrayList<>();
         int n = 0;
         for (KeyPropertyEntry entry : propertyEntries) {
-            fields.add(entry.displayName());
+            fields.add(entry.displayName(type));
             n++;
             if (n % propertiesPerLine == 0) {
                 fields.add("\n");
