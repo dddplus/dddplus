@@ -5,7 +5,6 @@
  */
 package io.github.dddplus.ast.view;
 
-import com.google.common.collect.Sets;
 import io.github.dddplus.ast.model.*;
 import io.github.dddplus.ast.report.CoverageReport;
 import io.github.dddplus.dsl.KeyElement;
@@ -48,12 +47,12 @@ public class PlantUmlRenderer implements IModelRenderer<PlantUmlRenderer> {
 
     // https://plantuml.com/zh/color
     private static final String COLOR_BEHAVIOR_PRODUCE_EVENT = "Violet";
+    private static final String COLOR_FLOW_REMARK = "Orchid";
 
     private String classDiagramSvgFilename;
     private String plantUmlFilename;
 
     private final Map<KeyRelation.Type, String> connections;
-    private Set<KeyElement.Type> ignored;
     private ReverseEngineeringModel model;
     private final StringBuilder content = new StringBuilder();
     private String header;
@@ -115,14 +114,13 @@ public class PlantUmlRenderer implements IModelRenderer<PlantUmlRenderer> {
     }
 
     @Override
-    public PlantUmlRenderer build(ReverseEngineeringModel model) {
-        return build(model, Sets.newHashSet());
+    public PlantUmlRenderer withModel(ReverseEngineeringModel model) {
+        this.model = model;
+        return this;
     }
 
-    public PlantUmlRenderer build(ReverseEngineeringModel model, Set<KeyElement.Type> ignored) {
-        this.model = model;
-        this.ignored = ignored;
-
+    @Override
+    public void render() throws IOException {
         start().appendDirection().appendSkinParam().appendTitle();
 
         if (showCoverage) {
@@ -142,11 +140,7 @@ public class PlantUmlRenderer implements IModelRenderer<PlantUmlRenderer> {
         addKeyEvents();
 
         appendFooter().end();
-        return this;
-    }
 
-    @Override
-    public void render() throws IOException {
         SourceStringReader reader = new SourceStringReader(content.toString());
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
         reader.generateImage(os, new FileFormatOption(FileFormat.SVG));
@@ -280,10 +274,6 @@ public class PlantUmlRenderer implements IModelRenderer<PlantUmlRenderer> {
         append(" {").append(NEWLINE);
         if (!keyModelEntry.types().isEmpty()) {
             for (KeyElement.Type type : keyModelEntry.types()) {
-                if (ignored.contains(type)) {
-                    continue;
-                }
-
                 append(String.format("    __ %s __", type)).append(NEWLINE);
                 append("    {field} ").append(keyModelEntry.displayFieldByType(type)).append(NEWLINE);
             }
@@ -365,7 +355,10 @@ public class PlantUmlRenderer implements IModelRenderer<PlantUmlRenderer> {
                 .append(SPACE)
                 .append(entry.getJavadoc());
         if (entry.getRemark() != null && !entry.getRemark().isEmpty()) {
-            append(SPACE).append(entry.getRemark());
+            append(SPACE)
+                    .append(MessageFormat.format(COLOR_TMPL_OPEN, COLOR_FLOW_REMARK))
+                    .append(entry.getRemark())
+                    .append(COLOR_TMPL_CLOSE);
         }
         if (keyModelEntry != null && !keyModelEntry.getClassName().equals(entry.umlDisplayActualClass())) {
             // 以IDEA url link形式展示实际类的位置：可点击

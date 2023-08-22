@@ -7,10 +7,7 @@ package io.github.dddplus.maven;
 
 import io.github.dddplus.ast.DomainModelAnalyzer;
 import io.github.dddplus.ast.model.ReverseEngineeringModel;
-import io.github.dddplus.ast.view.CallGraphRenderer;
-import io.github.dddplus.ast.view.EncapsulationRenderer;
-import io.github.dddplus.ast.view.PlainTextRenderer;
-import io.github.dddplus.ast.view.PlantUmlRenderer;
+import io.github.dddplus.ast.view.*;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -53,6 +50,14 @@ public class ModelingVisualizationMojo extends AbstractMojo {
     String sqliteDb;
     @Parameter(property = "fixModelPkg")
     String keyModelPkgFix;
+    @Parameter(property = "classHierarchy")
+    String classHierarchy;
+    /**
+     * Colon separated ignored parent classes.
+     */
+    @Parameter(property = "classHierarchyIgnoreParents")
+    String classHierarchyIgnoreParents;
+
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -86,9 +91,9 @@ public class ModelingVisualizationMojo extends AbstractMojo {
             if (targetPlantUml != null) {
                 artifacts.add(targetPlantUml);
                 PlantUmlRenderer renderer = new PlantUmlRenderer()
+                        .withModel(model)
                         .direction(PlantUmlRenderer.Direction.TopToBottom)
                         .skinParamPolyline()
-                        .build(model)
                         .classDiagramSvgFilename(targetPlantUml);
                 if (targetPlantUmlSrc != null) {
                     renderer.plantUmlFilename(targetPlantUmlSrc);
@@ -100,25 +105,36 @@ public class ModelingVisualizationMojo extends AbstractMojo {
                 artifacts.add(targetCallGraph);
                 artifacts.add(targetPackageRef);
                 new CallGraphRenderer()
+                        .withModel(model)
                         .targetCallGraphDotFile(targetCallGraph)
                         .targetPackageCrossRefDotFile(targetPackageRef)
                         .splines("polyline")
-                        .build(model)
                         .render();
             }
             if (targetEncapsulation != null) {
                 artifacts.add(targetEncapsulation);
                 new EncapsulationRenderer()
-                        .build(model)
+                        .withModel(model)
                         .targetFilename(targetEncapsulation)
                         .render();
             }
             if (targetTextModel != null) {
                 artifacts.add(targetTextModel);
                 new PlainTextRenderer()
+                        .withModel(model)
                         .showRawSimilarities()
                         .targetFilename(targetTextModel)
-                        .build(model)
+                        .render();
+            }
+            if (classHierarchy != null) {
+                artifacts.add(classHierarchy);
+                if (classHierarchyIgnoreParents == null) {
+                    classHierarchyIgnoreParents = "";
+                }
+                new ClassHierarchyRenderer()
+                        .withModel(model)
+                        .ignores(classHierarchyIgnoreParents.split(","))
+                        .targetDotFile(classHierarchy)
                         .render();
             }
 
