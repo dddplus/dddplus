@@ -6,11 +6,12 @@ import io.github.dddplus.ast.report.ClassHierarchyReport;
 
 import java.io.IOException;
 
+import static io.github.dddplus.ast.report.ClassHierarchyReport.Pair.Relation.Implements;
+
 public class ClassHierarchyRenderer implements IModelRenderer<ClassHierarchyRenderer> {
     private ClassHierarchyReport report;
     private String targetDotFile;
-    private static final String extendsEdgeTpl = " [color=red label=\"%s\"];";
-    private static final String implementsEdgeTpl = " [color=blue style=dashed label=\"%s\"];";
+    private static final String implementsEdgeStyle = "[arrowhead=empty style=dashed]";
 
     private StringBuilder content = new StringBuilder();
 
@@ -45,9 +46,13 @@ public class ClassHierarchyRenderer implements IModelRenderer<ClassHierarchyRend
     public void render() throws IOException {
         append("digraph G {")
                 .append(NEWLINE)
-                .append(TAB).append("rankdir=LR;").append(NEWLINE)
-                .append(TAB).append("splines = polyline;").append(NEWLINE)
-                .append(TAB).append("node [shape=none];").append(NEWLINE)
+                .append("fontname=\"Helvetica,Arial,sans-serif\"\n" +
+                        "node [fontname=\"Helvetica,Arial,sans-serif\"]\n" +
+                        "edge [fontname=\"Helvetica,Arial,sans-serif\"]\n" +
+                        "splines=curved\n" +
+                        "rankdir=\"LR\"\n" +
+                        "node [shape=box, height=0.25]\n" +
+                        "edge [fontsize=8 arrowsize=0.5]").append(NEWLINE)
                 .renderEdges()
                 .append("}");
 
@@ -56,15 +61,12 @@ public class ClassHierarchyRenderer implements IModelRenderer<ClassHierarchyRend
 
     private ClassHierarchyRenderer renderEdges() {
         for (ClassHierarchyReport.Pair pair : report.displayRelations()) {
-            append(pair.getFrom()).append(" -> ").append(pair.getTo()).append(SPACE);
-            switch (pair.getRelation()) {
-                case Extends:
-                    append(String.format(extendsEdgeTpl, pair.dotLabel()));
-                    break;
-
-                case Implements:
-                    append(String.format(implementsEdgeTpl, pair.dotLabel()));
-                    break;
+            append("\"").append(pair.dotFrom()).append("\"")
+                    .append(" -> ")
+                    .append("\"").append(pair.dotTo()).append("\"")
+                    .append(SPACE);
+            if (pair.getRelation() == Implements) {
+                append(SPACE).append(implementsEdgeStyle);
             }
             append(NEWLINE);
         }
