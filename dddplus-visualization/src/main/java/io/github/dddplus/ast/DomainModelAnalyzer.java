@@ -23,7 +23,6 @@ public class DomainModelAnalyzer {
     private double similarityThreshold = 25; // 25%
     private Set<String> ignoredAnnotations = new HashSet<>(); // in simpleName
     private boolean rawSimilarity = false;
-    private boolean disableCallGraph = false;
     private boolean classHierarchyOnly = false;
     private List<Map<String, String>> keyModelPackageFixes = new ArrayList<>();
 
@@ -39,6 +38,9 @@ public class DomainModelAnalyzer {
         return this;
     }
 
+    /**
+     * 仅显示静态的类的多态层级关系.
+     */
     public DomainModelAnalyzer classHierarchyOnly() {
         this.classHierarchyOnly = true;
         return this;
@@ -46,11 +48,6 @@ public class DomainModelAnalyzer {
 
     public DomainModelAnalyzer rawSimilarity() {
         this.rawSimilarity = true;
-        return this;
-    }
-
-    public DomainModelAnalyzer disableCallGraph() {
-        this.disableCallGraph = true;
         return this;
     }
 
@@ -277,18 +274,6 @@ public class DomainModelAnalyzer {
         for (KeyEventEntry entry : model.getKeyEventReport().getEvents()) {
             if (!model.hasProducer(entry)) {
                 entry.setOrphan(true);
-            }
-        }
-
-        // call graph
-        if (!disableCallGraph) {
-            log.debug("call graph");
-            CallGraphAstNodeVisitor callGraphAstNodeVisitor = new CallGraphAstNodeVisitor(dirs);
-            for (File dir : dirs) {
-                log.debug("parsing {}", CallGraphAstNodeVisitor.class.getSimpleName());
-                new FileWalker(actualFilter, (level, path, file) -> {
-                    callGraphAstNodeVisitor.visit(FileWalker.silentParse(file), model.getCallGraphReport());
-                }).walkFrom(dir);
             }
         }
 
