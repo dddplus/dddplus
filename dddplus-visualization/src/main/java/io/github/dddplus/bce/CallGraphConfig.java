@@ -11,6 +11,7 @@ import io.github.dddplus.ast.model.CallGraphEntry;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.bcel.generic.InvokeInstruction;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -30,6 +31,7 @@ public class CallGraphConfig implements Serializable {
     private Ignore ignore;
     private Accept accept;
     private Style style;
+    private List<String> relations;
 
     public static CallGraphConfig fromJsonFile(String filename) throws FileNotFoundException {
         Gson gson = new Gson();
@@ -56,6 +58,20 @@ public class CallGraphConfig implements Serializable {
 
     public double nodesep() {
         return style.nodesep;
+    }
+
+    public List<Pair<String, String>> userDefinedRelations() {
+        List<Pair<String, String>> result = new ArrayList<>();
+        if (relations == null || relations.isEmpty()) {
+            return result;
+        }
+
+        for (String rel : relations) {
+            Edge edge = new Edge(rel, useSimpleClassName());
+            result.add(Pair.of(edge.caller(), edge.callee()));
+        }
+
+        return result;
     }
 
     public boolean useSimpleClassName() {
@@ -219,7 +235,7 @@ public class CallGraphConfig implements Serializable {
             return false;
         }
 
-        private  boolean isAclClass(String className) {
+        private boolean isAclClass(String className) {
             for (PathMatcher matcher : aclClassPatterns) {
                 if (matcher.matches(Paths.get(className))) {
                     return true;
@@ -230,6 +246,36 @@ public class CallGraphConfig implements Serializable {
         }
     }
 
+    public static class Edge implements Serializable {
+        private final String caller;
+        private final String callee;
+
+        private Edge(String relation, boolean useSimpleClassName) {
+            String[] parts = relation.split(":");
+            if (parts.length != 2) {
+                throw new RuntimeException("CallGraph config relations accepted format is caller:callee");
+            }
+            
+            caller = parts[0];
+            callee = parts[1];
+            if (useSimpleClassName) {
+                if (caller.contains(".")) {
+                    caller.substring(caller.lastIndexOf(".") + 1);
+                }
+                if (callee.contains(".")) {
+                    callee.substring(callee.lastIndexOf(".") + 1);
+                }
+            }
+        }
+
+        private String caller() {
+            return caller;
+        }
+
+        String callee() {
+            return callee;
+        }
+    }
 
     @Data
     public static class Ignore implements Serializable {
