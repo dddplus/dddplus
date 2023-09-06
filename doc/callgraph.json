@@ -10,7 +10,9 @@
        "nodesep": 0.2
    },
    "ignore":{
-      "enumClazz":true,
+      "enumClazz": true,
+      "classInnerCall": false,
+      "orphanNodes": true,
       "classes":[
           "Dao", "JsonUtil", "CommonUtil", "InternalAopUtils", "BootstrapException", "StepsExecTemplate", "StepDef", "InterceptorDef",
           "BaseDecideStepsRouter", "DomainDef"
@@ -19,6 +21,7 @@
          "*jdbc"
       ],
       "callerMethods":[
+         "equals"
       ],
       "calleePackages":[
           "*jdbc.impl*", ".enums", ".dto", ".dao", ".repo", ".mapper"
